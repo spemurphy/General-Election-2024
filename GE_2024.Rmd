@@ -1,0 +1,165 @@
+---
+title: "General-Election-2024"
+author: "spemurphy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+The hypothesis being tested in this analysis is whether candidates who smile in election posters receive more votes than those who do not smile. For the purposes of this analysis, smile is defined as both the corners of the mouth turned up and the teeth showing, which is consistent with the Oxford Dictionary definition. 
+The analysis collected data from www.whichcandidate.ie, the Irish Times website, as well as in person sampling of election posters. The 'votes' variable counts only those votes achieved during count 1, as this is the most simple weighting possible and gives a good indication of people's preference. 
+
+The hypothesis' being tested are as follows:
+
+**Ho: The distribution of total percentage of votes for smiling candidates = the total percentage of votes for non-smiling candidates**
+
+**Ha: The distribution of total percentage of votes for smiling candidates /= the total percentage of votes for non-smiling candidates**
+
+**the test is a two-sided test at a 0.95% confidence level**
+
+Below is the data frame used as the sample for this analysis.
+
+
+```{r echo=TRUE}
+politicalPosters <- data.frame(
+  name = c("Robert O'Donoghue" , "Susanne Delaney", "Ellen Murphy", "Patrick Quinlan", "Edward MacManus", "Darren Jack Kelly", "Joan Hopkins", "Anne Graves", "Darragh O'Brien", "Lorraine Clifford-Lee", "Joe O'Brien", "Duncan Smith", "Ollie Power", "Dean Mulligan", "Margaret McGovern", "Conor Reddy", "Stephen Redmond", "Caroline Conroy", "Diarmuid MacDubhglas", "Rory Hearne", "John Nisbet", "Ian Croft", "James Morris", "Cian O'Callaghan", "Shane Folan", "Barry Henegen", "Bernard Mulvany", "Michael Burke", "Brian Garrigan", "Stephen Doyle", "David Healy", "Jamie McGlue", "John Lyons", "Dessie Ellis", "Pascal Donoghoe", "Mary Lou McDonald", "Marie Sherlock", "Janice Boylan", "Clare Daly", "Gary Gannon", "Neasa Hourigan", "Gerard Hutch", "Eoghan O Ceannabhain", "Ian Noel Smyth", "Jack Chambers", "Ruth Coppinger", "Emer Curie", "Breda Hanaphy", "Roderic O'Gorman", "Ellen Troy", "John Walsh", "Alan Farrell", "Manju Devi", "Grace Boland", "Bryn Edwards", "Ben Gilroy", "Robbie Loughlin", "Tony Murphy", "Louise O'Reilly", "John Oakes", "Kathryn Bermingham", "Pat Buckley", "Mona Stromsoe", "Mark Stanton", "Noel McCarthy", "Asch Ni Fhinn", "Liam Quaide", "Medhi Ozcinar", "Deirdre O'Brien", "James O'Connor", "Holly Cairns", "Tim Lombard", "Michael Collins", "Zoe Laplaud", "Mary Ryder", "Mairead Ruane", "Donnchadh O Seaghdha", "Christopher O'Sullivan", "Clare O'Callaghan", "Noel O'Donovan", "David Bradley", "David Brennan", "Marianne Butler", "Paula Butterly", "Antoin Watters", "James Renaghan", "Tracy O'Hanlon", "Derek McElearney", "Kevin Callan", "Joanna Byrne", "Mary Butler", "Ronan Cleary", "Frank Conway", "David Cullinane", "John D Walsh", "Matt Shanahan", "Mary Roche", "Marc O Cathasaigh", "Sadhbh O'Neill", "Patrick Curtin"),
+  gender = c(0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0), 
+  party = c("LAB", "IND", "SD", "NP", "AON", "IND", "SD", "SF", "FF", "FF", "GP", "LAB", "PBPS", "I4C", "AON", "PBPS", "NP", "GP", "IND", "SD", "LAB", "CEN", "AON", "SD", "LAB", "IND", "PBPS", "IND", "IND", "IND", "GP", "IND", "IND", "SF", "FG", "SF", "LAB", "SF", "I4C", "SD", "GP", "IND", "PBPS", "AON", "FF", "PBPS", "FG", "SF", "GP", "AON", "LAB", "FG", "FF", "FG", "PBPS", "IND", "AON", "IND", "SF", "IFP", "II", "SF", "AON", "FG", "FG", "PBPS", "SD", "SF", "FF", "FF", "SD", "FG", "II", "PBPS", "GP", "AON", "SF", "FF", "SF", "FG", "IND", "IND", "GP", "FG", "SF", "PBPS", "IND", "IP", "IND", "SF", "FF", "AON", "IND", "SF", "IP", "IND", "SD", "GP", "LAB", "PBPS"),
+ smile = c(0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0),
+ constituency = c("DFW", "DW", "DW", "DW", "DNW", "DFE", "DFE", "DFE", "DFE", "DFW", "DFW", "DFE", "DFE", "DFE", "DFE", "DNW", "DNW", "DNW", "DNW", "DNW", "DNW", "DNW", "DNW", "DBN", "DBN", "DBN", "DBN", "DBN", "DBN", "DBN", "DBN", "DBN", "DBN", "DNW", "DC", "DC", "DC", "DC", "DC","DC","DC","DC","DC","DC", "DW","DW","DW","DW","DW","DW","DW","DFE", "DFE", "DFW","DFW","DFW","DFW","DFW","DFW","DFW", "CE", "CE","CE","CE","CE","CE","CE","CE","CE","CE", "CSW", "CSW","CSW","CSW","CSW","CSW","CSW","CSW","CSW","CSW", "LH","LH","LH","LH","LH","LH","LH","LH","LH","LH", "WD", "WD", "WD", "WD", "WD", "WD", "WD", "WD", "WD", "WD"), 
+ votes = c(5044, 816, 2168, 1149, 1367, 834, 4025, 5450, 8906, 4417, 10, 5396, 750, 2234, 1549, 2917, 1209, 943, 463, 4631, 779, 183, 2460, 9738, 2921, 3602, 2046, 1379, 747, 104, 2107, 252, 1829, 5562, 5493, 6389, 2465, 1257, 1317, 4353, 1952, 3098, 1471, 715, 9446, 3552, 6791, 1567, 2909, 2453, 2455, 5379, 940, 4583, 1392, 417, 1163, 3588, 6965, 392, 842, 5901, 1789, 5740, 5364, 662, 4791, 671, 5196, 5891, 9421, 5003, 11002, 349, 349, 707, 835, 9115, 1448, 6122, 157, 671, 1504, 5646, 3676, 1671, 234, 119, 3223, 8169, 9962, 1664, 715, 11936, 482, 5355, 2717, 1671, 1500, 643)
+)
+
+politicalPosters$smile <- as.factor(politicalPosters$smile)
+class(politicalPosters$smile)
+```
+
+
+# Exploratory Data Analysis
+
+
+```{r echo=TRUE}
+suppressWarnings(library(dplyr))
+# An equal sample drawn from ten different constituencies across Ireland
+table(politicalPosters$constituency)
+
+# Creating an additional variable 'pctVotes' which calculates the percentage of votes received by each candidate based on the valid polls for each constituency.
+validPolls <- c(48009, 47294, 65568, 32754, 37899, 30117, 32733, 44236, 63735, 53650)
+politicalPosters$pctVotes <- NA
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "CE", votes / validPolls[1], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "CSW", votes / validPolls[2], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "DBN", votes / validPolls[3], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "DC", votes / validPolls[4], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "DFE", votes / validPolls[5], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "DFW", votes / validPolls[6], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "DNW", votes / validPolls[7], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "DW", votes / validPolls[8], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "LH", votes / validPolls[9], pctVotes))
+politicalPosters <- politicalPosters %>%
+  mutate(pctVotes = ifelse(constituency == "WD", votes / validPolls[10], pctVotes))
+```
+
+```{r}
+# Comparing non-smiling vs smiling candidates
+library(ggplot2)
+boxplot(pctVotes ~ smile, data=politicalPosters, col="#009A49", names=c("no smile", "smile"))
+```
+
+Initially, the boxplot comparing smiling vs non-smiling election posters shows a higher median for smiling candidates compared to their non-smiling counterparts. Moreover, the lower 25% of smiling candidates received more votes than the median of non-smiling candidates. From the graph above, we can infer that there is a difference in the percentage of votes received for smiling vs non-smiling candidates. 
+
+```{r}
+suppressWarnings(library(dplyr))
+
+# Summary statistics for non-smiling candidates
+summary(politicalPosters %>%
+       subset(smile == 0) %>%
+       .$pctVotes,)
+
+# Summary statistics for smiling candidates
+summary(politicalPosters %>%
+       subset(smile == 1) %>%
+       .$pctVotes,)
+```
+The tables demonstrate numerically, that candidates who smiled had a median of 0.075% or 7.5% of total votes for that constituency, while candidates who did not smile had a median of 0.028% or 2.8% of total votes for that constituency based on the first poll. Smiling candidates also had a higher mean of 9.13% versus 5.42% for non-smiling candidates. 
+
+## Can the disparity be explained?
+
+The reason I began this analysis was two-fold: (1) I wanted to test out the techniques learned during the data science course I am currently studying, and (2) the smiling, or the lack thereof, and its consistency across parties, almost as to indicate "we're not happy with the current government". Making political claims or inferring sentiment is beyond the scope of this analysis, but I will now put the numbers to the test. 
+
+```{r}
+# Counting how many people from each party are not smiling
+nonSmileCount <- politicalPosters %>%
+  subset(smile == 0) %>%
+  count(party)
+
+# Counting how many people from each party are smiling
+smileCount <- politicalPosters %>%
+  subset(smile == 1) %>%
+  count(party)
+
+# Combine the data into one frame
+combinedCounts <- merge(nonSmileCount, smileCount, by = "party", all = TRUE) %>%
+  rename(nonSmile = n.x, smile = n.y)
+
+# Calculate percentages
+combinedCounts <- combinedCounts %>%
+  mutate(total = nonSmile + smile,
+         percNonSmile = (nonSmile / total) * 100,
+         percSmile = (smile / total) * 100)
+
+# Grouped Barplot
+barMatrix <- t(as.matrix(combinedCounts[, c("nonSmile", "smile")]))
+colnames(barMatrix) <- combinedCounts$party
+
+# Plot
+par(mar = c(8, 4, 4, 2))
+barplot(barMatrix, beside = TRUE, col = c("#009A49", "#FF8200"),
+        legend.text = c("No Smile", "Smile"), 
+        args.legend = list(x = "topright"),
+        main = "Votes by Smile and Party",
+        xlab = "Party", ylab = "Count",
+        las = 2,
+        cex.names = 0.8)
+```
+
+The graph above shows that *some* parties were consistent in whether they smiled or not for their election poster(1), while some were more balanced. From the sample of posters, parties Fianna Fail and Fine Gael had 100% and 89% of their members smiling respectively, while Independent candidates and People Before Profit-Solidarity had 72% and 80% of their members not smiling respectively. It is interesting to note that the Center Party, the Irish Freedom Party, Independent Ireland and the National Party were all not smiling, however the size of these samples is small, which may be a sampling error.
+
+# The Hypothesis Test
+
+```{r}
+par(mfrow= c(1, 2))
+hist(politicalPosters %>%
+       subset(smile == 0) %>%
+       .$pctVotes, main ="Non-smiling candidates", xlab="votes", breaks=20)
+hist(politicalPosters %>%
+       subset(smile == 1) %>%
+       .$pctVotes, main ="Smiling candidates", xlab="votes", breaks=20)
+```
+
+
+As the data distributions for both groups are non-normal, the hypothesis test being used is a rank-sum test. The rank-sum test will compare whether there is enough evidence to suggest a difference between the two distributions of non-smiling vs smiling candidates. 
+
+```{r}
+wilcox.test(politicalPosters$pctVotes ~ politicalPosters$smile, mu=0, alt="two.sided", conf.int=T, conf.level=0.95, paired=F, exact=F, correct=T)
+```
+
+## Conclusion: 
+
+At the = [0.05]level, we reject the null hypothesis. There is sufficient to conclude that the distribution of total percentage of votes for smiling candidates /= the total percentage of votes for non-smiling candidates. Because the confidence interval does not contain zero, this lends further support to the rejection of the null hypothesis at a 95% confidence level. Because the report shows that numerically the median and mean of 'pctVotes' for smiling ('smile = 1') candidates is higher than the non-smiling ('smile = 0') candidates, as well as the rank-sum test lending support to the alternative hypothesis, it can be concluded that there is statistically significant evidence that smiling candidates receive a greater percentage of votes than non-smiling candidates. 
+
+
+(1) Consistent in this context in no way indicates that this was an organised or corroborated effort among parties. 
